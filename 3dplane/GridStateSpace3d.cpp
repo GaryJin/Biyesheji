@@ -2,6 +2,7 @@
 #include <util.h>
 #include <stdexcept>
 #include <math.h>
+#include <QDebug>
 
 using namespace Eigen;
 using namespace std;
@@ -82,12 +83,18 @@ bool GridStateSpace3d::transitionValid(const Vector3f &from, const Vector3f &to)
                     Vector2f from2dxz(from.x(),from.z());
                     Vector2f to2dxz(to.x(),to.z());
                     bool safexz=transitionValid2d(from2dxz,to2dxz,x,z,gridSqWidth,gridSqHeight);
-                    if(safexy||safeyz||safexz)
+                    //_---------------------------------
+                    //qDebug()<<"from:"<<discreteFrom.x()<<","<<discreteFrom.y()<<","<<discreteFrom.z();
+                    //qDebug()<<"to:"<<discreteTo.x()<<","<<discreteTo.y()<<","<<discreteTo.z();
+                    //qDebug()<<"(x,y,z)=:"<<x<<","<<y<<","<<z;
+                    //qDebug()<<"xy?:"<<safexy<<" yz?:"<<safeyz<<" xz?:"<<safexz;
+                    //----------------------------------
+
+                    if(!(safexy||safeyz||safexz))
                     {
-                        return true;
-                    }
-                    else
+                        //qDebug()<<"find one path with ob!";
                         return false;
+                    }
                 }
             }
 
