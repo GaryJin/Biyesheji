@@ -1,4 +1,4 @@
-#include "GridStateSpace.hpp"
+#include <2dplane/GridStateSpace.hpp>
 #include <util.h>
 #include <stdexcept>
 #include <math.h>

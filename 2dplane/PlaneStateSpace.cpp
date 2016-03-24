@@ -1,4 +1,4 @@
-#include "planestatespace.h"
+#include <2dplane/planestatespace.h>
 
 using namespace Eigen;
 

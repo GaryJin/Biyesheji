@@ -94,6 +94,11 @@ namespace RRTStar
             _goalTree.setMaxStepSize(stepSize);
         }
 
+        const double getsolutionLength()
+        {
+            return _solutionLength;
+        }
+
         float goalMaxDist() const {
             return _startTree.goalMaxDist();
         }
@@ -126,8 +131,6 @@ namespace RRTStar
 
             Node<T> *newStartNode = _startTree.grow(_solutionLength);
             if (newStartNode) {
-                qDebug()<<"solutionLenth:"<<_solutionLength;
-          //      qDebug()<<"new node distance :"<<newStartNode->getDistance();
                 _startTree.nearnodes(newStartNode);
                 _startTree.OptimizeNearNodes(newStartNode);
                 otherNode = _findBestPath(newStartNode->state(), _goalTree, &depth);
@@ -148,7 +151,6 @@ namespace RRTStar
                     _startSolutionNode = otherNode;
                     _goalSolutionNode = newGoalNode;
                     _solutionLength = newGoalNode->getDistance() + depth;
-                    qDebug()<<"solutionLenth:"<<_solutionLength;
                 }
             }
 
@@ -162,11 +164,12 @@ namespace RRTStar
         /**
          * @brief Grows the trees until we find a solution or run out of iterations.
          */
-        void run() {
+        bool run() {
             for (int i = 0; i < _startTree.maxIterations(); i++) {
                 grow();
-                if (_startSolutionNode != nullptr) break;
+                if (_startSolutionNode != nullptr) return true;
             }
+            return false;
         }
 
 

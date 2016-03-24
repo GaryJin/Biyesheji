@@ -1,15 +1,19 @@
-
+#include <QFileDialog>
 #include "MainWindow.hpp"
-
+#include <QDebug>
 
 MainWindow::MainWindow() {
     _rrtWidget = new RRTWidget();
 
-    setWindowTitle("Interactive RRT");
+    setWindowTitle("Interactive MyBRRT*");
 
     _iterationCountLabel = new QLabel(this);
     _iterationCountLabel->setText("Iterations: 0");
     statusBar()->addPermanentWidget(_iterationCountLabel);
+
+    _SolutionLengthLabel = new QLabel(this);
+    _SolutionLengthLabel->setText("SolutionLength: None");
+    statusBar()->addPermanentWidget(_SolutionLengthLabel);
 
     QPushButton *run = new QPushButton(this);
     run->setText("Run");
@@ -23,9 +27,15 @@ MainWindow::MainWindow() {
 
     QPushButton *stepBig = new QPushButton(this);
     stepBig->setText("Step 100");
-    
+
     QPushButton *reset = new QPushButton(this);
     reset->setText("Reset");
+
+    QPushButton *openmap = new QPushButton(this);
+    openmap->setText("OpenMap");
+
+    QPushButton *savemap = new QPushButton(this);
+    savemap->setText("SaveMap");
 
     QPushButton *clearObstacles = new QPushButton(this);
     clearObstacles->setText("Clear Obstacles");
@@ -54,7 +64,7 @@ MainWindow::MainWindow() {
 
     QLabel *stepSizeLabel = new QLabel("Step Size:");
 
-    QCheckBox *ascCheckbox = new QCheckBox("Adaptive Stepsize Control", this);
+    QCheckBox *ascCheckbox = new QCheckBox("Adaptive Stepsize", this);
     
     QGridLayout *layout = new QGridLayout();
     layout->addWidget(run, 0, 0);
@@ -69,8 +79,10 @@ MainWindow::MainWindow() {
     layout->addWidget(_waypointBiasLabel, 0, 4);
     layout->addWidget(stepSizeBox, 1, 5);
     layout->addWidget(stepSizeLabel, 0, 5);
-    layout->addWidget(ascCheckbox, 0, 6);
-    layout->addWidget(_rrtWidget, 2, 0, 1, 7);
+    layout->addWidget(ascCheckbox, 0, 6, 1, 2);
+    layout->addWidget(openmap, 1, 6);
+    layout->addWidget(savemap, 1, 7);
+    layout->addWidget(_rrtWidget, 2, 0, 1, 8);
 
     QWidget *centralWidget = new QWidget(this);
     centralWidget->setLayout(layout);
@@ -86,6 +98,8 @@ MainWindow::MainWindow() {
     connect(stepBig, SIGNAL(clicked()), _rrtWidget, SLOT(slot_stepBig()));
     connect(reset, SIGNAL(clicked()), _rrtWidget, SLOT(slot_reset()));
     connect(clearObstacles, SIGNAL(clicked()), _rrtWidget, SLOT(slot_clearObstacles()));
+    connect(openmap, SIGNAL(clicked()), _rrtWidget, SLOT(slot_openmap()));
+    connect(savemap, SIGNAL(clicked()), _rrtWidget, SLOT(slot_savemap()));
     connect(goalBias, SIGNAL(valueChanged(int)), _rrtWidget, SLOT(slot_setGoalBias(int)));
     connect(goalBias, SIGNAL(valueChanged(int)), this, SLOT(slot_updateGoalBiasLabel(int)));
     connect(waypointBias,SIGNAL(valueChanged(int)), _rrtWidget, SLOT(slot_setWaypointBias(int)));
@@ -93,6 +107,7 @@ MainWindow::MainWindow() {
     connect(stepSizeBox, SIGNAL(valueChanged(double)), _rrtWidget, SLOT(slot_setStepSize(double)));
     connect(ascCheckbox, SIGNAL(stateChanged(int)), _rrtWidget, SLOT(slot_setASC(int)));
     connect(_rrtWidget, SIGNAL(signal_stepped(int)), this, SLOT(slot_updateIterationCount(int)));
+    connect(_rrtWidget, SIGNAL(signal_solution(int)), this, SLOT(slot_updateSolutionLength(int)));
 
     //  keyboard shortcuts
     new QShortcut(QKeySequence(Qt::Key_R), _rrtWidget, SLOT(slot_run()));
@@ -110,4 +125,11 @@ void MainWindow::slot_updateWaypointBiasLabel(int value) {
 
 void MainWindow::slot_updateIterationCount(int iterationCount) {
     _iterationCountLabel->setText(QString("Iterations: %1").arg(iterationCount));
+}
+void MainWindow::slot_updateSolutionLength(int solutionLength)
+{
+    if(solutionLength<0)
+        _SolutionLengthLabel->setText(QString("SolutionLength: None"));
+    else
+        _SolutionLengthLabel->setText(QString("SolutionLength: %1").arg(solutionLength));
 }

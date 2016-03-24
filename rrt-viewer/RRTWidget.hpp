@@ -30,10 +30,12 @@ private slots:
     void slot_setWaypointBias(int bias);    //  bias is from 0 to 100
     void slot_setASC(int checked);
     void slot_setStepSize(double step);
+    void slot_openmap();
+    void slot_savemap();
 
 signals:
     void signal_stepped(int iterationCount);
-
+    void signal_solution(int solutionlength);
 
 protected:
     void paintEvent(QPaintEvent *p);

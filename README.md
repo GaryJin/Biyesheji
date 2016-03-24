@@ -9,6 +9,8 @@ University graduation design
 #####birrtstar.h双向rrt*算法类<br>
 #####文件2dplane
 ######实例化的2d状态空间和障碍物
+#####文件3dplane
+######实例化的3d状态空间和障碍物
 #####文件rrt-viewer
 ######结合qt框架的ui界面
 #####文件planning

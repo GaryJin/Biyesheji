@@ -1,6 +1,7 @@
 #include <3dplane/ObstacleGrid3d.h>
 #include <stdlib.h>
 #include <iostream>
+#include <math.h>
 
 using namespace Eigen;
 using namespace std;
@@ -78,12 +79,14 @@ void ObstacleGrid3d::clear() {
     }
 }
 
-bool &ObstacleGrid3d::obstacleAt(int x, int y,int z) {
-    return _obstacles[x + _discretizedWidth*y + _discretizedLength*_discretizedWidth*z];
+bool &ObstacleGrid3d::obstacleAt(double x, double y, double z) {
+    int xint=floor(x),yint=floor(y),zint=floor(z);
+    return _obstacles[xint + _discretizedWidth*yint + _discretizedLength*_discretizedWidth*zint];
 }
 
-bool ObstacleGrid3d::obstacleAt(int x, int y,int z) const {
-    return _obstacles[x + _discretizedWidth*y + _discretizedLength*_discretizedWidth*z];
+bool ObstacleGrid3d::obstacleAt(double x, double y, double z) const {
+    int xint=floor(x),yint=floor(y),zint=floor(z);
+    return _obstacles[xint + _discretizedWidth*yint + _discretizedLength*_discretizedWidth*zint];
 }
 
 bool &ObstacleGrid3d::obstacleAt(const Vector3i &gridLoc) {

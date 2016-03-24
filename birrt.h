@@ -29,7 +29,6 @@ namespace RRT
             _startSolutionNode = nullptr;
             _goalSolutionNode = nullptr;
             _solutionLength = DBL_MAX;
-            qDebug()<<"DBL_max:"<<DBL_MAX;
         }
 
 
@@ -70,6 +69,11 @@ namespace RRT
         void setWaypointBias(float waypointBias) {
             _startTree.setWaypointBias(waypointBias);
             _goalTree.setWaypointBias(waypointBias);
+        }
+
+        const double getsolutionLength()
+        {
+            return _solutionLength;
         }
 
         const std::vector<T> &waypoints() {
@@ -133,7 +137,6 @@ namespace RRT
                     _startSolutionNode = newStartNode;
                     _goalSolutionNode = otherNode;
                     _solutionLength = newStartNode->getDistance() + depth;
-                    qDebug()<<"solutionLenth:"<<_solutionLength;
                 }
             }
 
@@ -144,7 +147,6 @@ namespace RRT
                     _startSolutionNode = otherNode;
                     _goalSolutionNode = newGoalNode;
                     _solutionLength = newGoalNode->getDistance() + depth;
-                    qDebug()<<"solutionLenth:"<<_solutionLength;
                 }
             }
 
@@ -155,11 +157,12 @@ namespace RRT
         /**
          * @brief Grows the trees until we find a solution or run out of iterations.
          */
-        void run() {
+        bool run() {
             for (int i = 0; i < _startTree.maxIterations(); i++) {
                 grow();
-                if (_startSolutionNode != nullptr) break;
+                if (_startSolutionNode != nullptr) return true;
             }
+            return false;
         }
 
 

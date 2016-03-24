@@ -1,7 +1,9 @@
-
 #include "RRTWidget.hpp"
 #include <planning/Path.hpp>
 #include <2dplane/2dplane.h>
+#include <QDebug>
+#include <QFile>
+#include <QTextCodec>
 
 using namespace RRTStar;
 using namespace Eigen;
@@ -61,7 +63,7 @@ void RRTWidget::slot_reset() {
     _biRRTStar->setWaypoints(waypoints);
 
     emit signal_stepped(0);
-
+    emit signal_solution(-1);
     repaint();
 }
 
@@ -129,11 +131,79 @@ void RRTWidget::step(int numTimes) {
     if (_biRRTStar->startSolutionNode() != nullptr) {
         _biRRTStar->getPath(_previousSolution);
         Planning::SmoothPath<Vector2f>(_previousSolution, *_stateSpace);
+        emit signal_solution(_biRRTStar->getsolutionLength());
     }
 
     emit signal_stepped(_biRRTStar->iterationCount());
 
     repaint();
+}
+
+/*
+ * @brief open the map file and read the obstacle from the map file
+ */
+void RRTWidget::slot_openmap()
+{
+    const QString directoryName = QFileDialog::getOpenFileName(this, tr("Open Text"), "/home/gary/build-untitled-Desktop_Qt_5_5_1_GCC_64bit-Debug", tr("Text Files(*.txt)"));
+
+    QFile file(directoryName);
+    if(!file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
+            QMessageBox::information(this, tr("Failed to open this file"), tr("Failed to open this file"));
+            return;
+    }
+
+    _stateSpace->obstacleGrid().clear();
+
+    QTextStream stream(&file);
+    while(!stream.atEnd())
+    {
+        int x=-1,y=-1;
+        char m;
+        stream>>x>>m>>y;
+        if(stream.atEnd())
+            break;
+        Vector2f pos = Vector2f(x,y);
+        Vector2i gridLoc = _stateSpace->obstacleGrid().gridSquareForLocation(pos);
+        //  toggle the obstacle state of clicked square
+        _stateSpace->obstacleGrid().obstacleAt(gridLoc) = true;
+
+    }
+
+    repaint();
+}
+
+/*
+ * @brief save the current obstacle to the .txt file
+ */
+void RRTWidget::slot_savemap()
+{
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Text"),
+                "/home/gary/build-untitled-Desktop_Qt_5_5_1_GCC_64bit-Debug",
+                tr("*.txt"));
+    qDebug()<<filename;
+    qDebug()<<QFile::exists(filename);
+    if(!QFile::exists(filename))
+    {
+        QFile file(filename);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QMessageBox::information(this,
+                tr("Failed to save the file"),
+                tr("Failed to save the file!"));
+            return;
+        }
+        QTextStream out(&file);
+        for(int x=0; x<40; x++)
+            for(int y=0; y<30; y++)
+            {
+                Vector2i pos(x,y);
+                if(_stateSpace->obstacleGrid().obstacleAt(pos))
+                    out<<x*20<<","<<y*20<<"\n";
+
+            }
+        return;
+    }
 }
 
 QPointF RRTWidget::pointFromNode(const Node<Vector2f> *n) {
@@ -235,6 +305,9 @@ void RRTWidget::paintEvent(QPaintEvent *p) {
     drawTerminalState(painter, _biRRTStar->goalState(), _goalVel, Qt::darkGreen);
 }
 
+/*
+ * draw the start and goal symbol
+ */
 void RRTWidget::drawTerminalState(QPainter &painter, const Vector2f &pos, const Vector2f &vel, const QColor &color) {
     //  draw point
     painter.setPen(QPen(color, 6));

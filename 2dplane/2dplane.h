@@ -1,9 +1,9 @@
 #pragma once
 
-#include <tree.h>
+#include <rrtstartree.h>
 #include <statespace.h>
 #include <Eigen/Dense>
-
+#include <tree.h>
 
 /**
  * This creates an instance of an RRT Tree with the callbacks
@@ -22,7 +22,13 @@
  * You'll probably want to override the transitionValidator callback
  * if your 2d plane has any obstacles.
  */
-RRT::Tree<Eigen::Vector2f> *TreeFor2dPlane(
+RRT::Tree<Eigen::Vector2f> *rrtTreeFor2dPlane(
+    std::shared_ptr<StateSpace<Eigen::Vector2f>> stateSpace,
+    Eigen::Vector2f goal,
+    float step);
+
+
+RRTStar::rrtStarTree<Eigen::Vector2f> *rrtStarTreeFor2dPlane(
     std::shared_ptr<StateSpace<Eigen::Vector2f>> stateSpace,
     Eigen::Vector2f goal,
     float step);

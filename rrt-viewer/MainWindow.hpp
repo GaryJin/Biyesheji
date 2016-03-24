@@ -1,4 +1,3 @@
-
 #include <QtWidgets>
 #include "RRTWidget.hpp"
 
@@ -17,10 +16,12 @@ protected slots:
     void slot_updateGoalBiasLabel(int value);
     void slot_updateWaypointBiasLabel(int value);
     void slot_updateIterationCount(int iterationCount);
+    void slot_updateSolutionLength(int solutionLength);
 
 private:
     RRTWidget *_rrtWidget;
     QLabel *_goalBiasLabel;
     QLabel *_waypointBiasLabel;
     QLabel *_iterationCountLabel;
+    QLabel *_SolutionLengthLabel;
 };

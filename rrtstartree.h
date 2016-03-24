@@ -214,6 +214,7 @@ namespace RRTStar
         /**
          * Picks a random state and attempts to extend the tree towards it.
          * This is called at each iteration of the run() method.
+         * @param the distance between root and newnode no more than the limitdistance
          */
         Node<T> *grow(double limitdistance) {
             //  extend towards goal, waypoint, or random state depending on the biases and a random number
@@ -231,6 +232,7 @@ namespace RRTStar
         /**
          * Find out nodes that near the aim node the first argument is the aim
          * node.
+         * @param aim node
          */
         void nearnodes(Node<T> *newnode)
         {
@@ -250,6 +252,11 @@ namespace RRTStar
             }
         }
 
+        /**
+         * Optimize the nodes that near the aim node by changing their parent to the aim node
+         * if the distance will be less through the aim node
+         * @param aim node
+         */
         void OptimizeNearNodes(Node<T> *newnode)
         {
             for(Node<T> *nearnode : _nearnodes)

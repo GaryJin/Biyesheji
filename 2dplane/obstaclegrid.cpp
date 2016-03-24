@@ -1,4 +1,4 @@
-#include "obstaclegrid.h"
+#include <2dplane/obstaclegrid.h>
 #include <stdlib.h>
 #include <iostream>
 

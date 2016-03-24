@@ -24,8 +24,8 @@ public:
      */
     float nearestObstacleDist(const Eigen::Vector3f &state, float maxDist) const;
     void clear();
-    bool &obstacleAt(int x, int y, int z);
-    bool obstacleAt(int x, int y, int z) const;
+    bool &obstacleAt(double x, double y, double z);
+    bool obstacleAt(double x, double y, double z) const;
     bool &obstacleAt(const Eigen::Vector3i &gridLoc);
     bool obstacleAt(const Eigen::Vector3i &gridLoc) const;
 
