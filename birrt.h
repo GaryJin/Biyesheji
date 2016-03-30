@@ -207,7 +207,7 @@ namespace RRT
                 if (dist < goalMaxDist() && other->getDistance() < depth) {
                     if (dist < goalMaxDist() && other->getDistance() < depth ) {
                         bestNode = other;
-                        depth = other->getDistance();
+                        depth = other->getDistance() + dist;
                     }
                 }
             }

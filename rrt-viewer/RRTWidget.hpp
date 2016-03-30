@@ -35,7 +35,7 @@ private slots:
 
 signals:
     void signal_stepped(int iterationCount);
-    void signal_solution(int solutionlength);
+    void signal_solution(double solutionlength);
 
 protected:
     void paintEvent(QPaintEvent *p);

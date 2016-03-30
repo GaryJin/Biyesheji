@@ -16,7 +16,7 @@ protected slots:
     void slot_updateGoalBiasLabel(int value);
     void slot_updateWaypointBiasLabel(int value);
     void slot_updateIterationCount(int iterationCount);
-    void slot_updateSolutionLength(int solutionLength);
+    void slot_updateSolutionLength(double solutionLength);
 
 private:
     RRTWidget *_rrtWidget;

@@ -112,7 +112,7 @@ MainWindow::MainWindow() {
     connect(stepSizeBox, SIGNAL(valueChanged(double)), _rrtWidget, SLOT(slot_setStepSize(double)));
     connect(ascCheckbox, SIGNAL(stateChanged(int)), _rrtWidget, SLOT(slot_setASC(int)));
     connect(_rrtWidget, SIGNAL(signal_stepped(int)), this, SLOT(slot_updateIterationCount(int)));
-    connect(_rrtWidget, SIGNAL(signal_solution(int)), this, SLOT(slot_updateSolutionLength(int)));
+    connect(_rrtWidget, SIGNAL(signal_solution(double)), this, SLOT(slot_updateSolutionLength(double)));
 
     //  keyboard shortcuts
     new QShortcut(QKeySequence(Qt::Key_R), _rrtWidget, SLOT(slot_run()));
@@ -132,7 +132,7 @@ void MainWindow::slot_updateIterationCount(int iterationCount) {
     _iterationCountLabel->setText(QString("Iterations: %1").arg(iterationCount));
 }
 
-void MainWindow::slot_updateSolutionLength(int solutionLength)
+void MainWindow::slot_updateSolutionLength(double solutionLength)
 {
     if(solutionLength<0)
         _SolutionLengthLabel->setText(QString("SolutionLength: None"));

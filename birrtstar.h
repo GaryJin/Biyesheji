@@ -215,7 +215,7 @@ namespace RRTStar
                     if(_startTree.stateSpace ().transitionValid (other->state (), targetState))
                     {
                         bestNode = other;
-                        depth = other->getDistance();
+                        depth = other->getDistance() + dist;
                     }
                 }
             }
