@@ -205,8 +205,10 @@ namespace RRT
             for (Node<T> *other : treeToSearch.allNodes()) {
                 float dist = _startTree.stateSpace().distance(other->state(), targetState);
                 if (dist < goalMaxDist() && other->getDistance() < depth) {
-                    bestNode = other;
-                    depth = other->getDistance();
+                    if (dist < goalMaxDist() && other->getDistance() < depth ) {
+                        bestNode = other;
+                        depth = other->getDistance();
+                    }
                 }
             }
 

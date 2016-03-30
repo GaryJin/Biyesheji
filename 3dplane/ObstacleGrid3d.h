@@ -5,7 +5,7 @@
 
 
 /**
- * @brief Handles a grid of obstacles laid over a continuous 2d plane.
+ * @brief Handles a grid of obstacles laid over a continuous 3d plane.
  * @details The state space is broken up into a grid with the given discrete height and widths.
  */
 class ObstacleGrid3d {

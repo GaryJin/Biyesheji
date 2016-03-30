@@ -126,6 +126,18 @@ bool GridStateSpace::transitionValid(const Vector2f &from, const Vector2f &to) c
     return true;
 }
 
+int GridStateSpace::transitionValid (const std::vector<Eigen::Vector2f> points) const{
+
+    for(int i=0; i<points.size()-1; i++)
+    {
+        if(!transitionValid(points[i],points[i+1]))
+            return i;
+    }
+
+    return -1;
+}
+
+
 const ObstacleGrid &GridStateSpace::obstacleGrid() const {
     return _obstacleGrid;
 }

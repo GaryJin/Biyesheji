@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QTextCodec>
+#include <bezier2d.h>
 
 using namespace RRTStar;
 using namespace Eigen;
@@ -19,16 +20,20 @@ RRTWidget::RRTWidget() {
                                         40,
                                         30);
     _biRRTStar = new BiRRTStar<Vector2f>(_stateSpace);
+
+
+    //set the size of the widget
     setFixedSize(800, 600);
 
     _waypointCacheMaxSize = 15;
 
-    //  setup birrt
-    _biRRTStar->setStartState(Vector2f(50, 50));
-    _biRRTStar->setGoalState(Vector2f(width() / 2.0, height() / 2.0));
+    //  setup birrtStar
+    _biRRTStar->setStartState(Vector2f(50, 300));
+    _biRRTStar->setGoalState(Vector2f(750, 300));
     _biRRTStar->setStepSize(10);
-    _biRRTStar->setMaxStepSize(30);
+    _biRRTStar->setMaxStepSize(40);
     _biRRTStar->setGoalMaxDist(12);
+
 
     _startVel = Vector2f(1, 0);
     _goalVel = Vector2f(0, 1);
@@ -64,6 +69,7 @@ void RRTWidget::slot_reset() {
 
     emit signal_stepped(0);
     emit signal_solution(-1);
+
     repaint();
 }
 
@@ -95,6 +101,7 @@ void RRTWidget::slot_stepBig() {
 
 void RRTWidget::slot_setStepSize(double step) {
     _biRRTStar->setStepSize(step);
+    _biRRTStar->setGoalMaxDist(step*1.2);
 }
 
 void RRTWidget::slot_run() {
@@ -217,11 +224,11 @@ QPointF vecToPoint(const Vector2f &vec) {
 void RRTWidget::paintEvent(QPaintEvent *p) {
     QPainter painter(this);
 
-    //  draw black border around widget
+    //  Draw black border around widget
     painter.setPen(QPen (Qt::black, 3));
     painter.drawRect(rect());
 
-    //  draw obstacles
+    //  Draw obstacles
     int rectW = rect().width() / _stateSpace->obstacleGrid().discretizedWidth(), rectH = rect().height() / _stateSpace->obstacleGrid().discretizedHeight();
     painter.setPen(QPen(Qt::black, 2));
     for (int x = 0; x < _stateSpace->obstacleGrid().discretizedWidth(); x++) {
@@ -233,9 +240,9 @@ void RRTWidget::paintEvent(QPaintEvent *p) {
     }
 
 
-    //  draw previous solution
+    //  Draw previous solution
     if (_previousSolution.size() > 0) {
-        painter.setPen(QPen(Qt::yellow, 3));
+        painter.setPen(QPen(Qt::gray, 5));
         Vector2f prev;
         bool first = true;
         for (const Vector2f &curr : _previousSolution) {
@@ -249,12 +256,18 @@ void RRTWidget::paintEvent(QPaintEvent *p) {
 
 
 
-        //  draw cubic bezier interpolation of waypoints
-        painter.setPen(QPen(Qt::darkBlue, 5));
-        QPainterPath path(vecToPoint(_previousSolution[0]));
+        //  Draw cubic bezier interpolation of waypoints
+        painter.setPen(QPen(Qt::darkRed, 5));
+
+        //QPainterPath path(vecToPoint(_previousSolution[0]));
+
+        //To store the bezier insert point
+        vector<Vector2f> beziercurve;
+        beziercurve.push_back(_previousSolution[0]);
 
         Vector2f prevControlDiff = -_startVel*VelocityDrawingMultiplier;
         for (int i = 1; i < _previousSolution.size(); i++) {
+            //Calculate the two control points
             Vector2f waypoint = _previousSolution[i];
             Vector2f prevWaypoint = _previousSolution[i-1];
 
@@ -264,7 +277,7 @@ void RRTWidget::paintEvent(QPaintEvent *p) {
                 controlLength = _goalVel.norm() * VelocityDrawingMultiplier;
                 controlDir = -_goalVel.normalized();
             } else {
-                //  using first derivative heuristic from Sprunk 2008 to determine the distance of the control point from the waypoint
+
                 Vector2f nextWaypoint = _previousSolution[i+1];
                 controlLength = 0.5*min( (waypoint - prevWaypoint).norm(), (nextWaypoint - waypoint).norm() );
                 controlDir = ((prevWaypoint - waypoint).normalized() - (nextWaypoint - waypoint).normalized()).normalized();
@@ -273,16 +286,53 @@ void RRTWidget::paintEvent(QPaintEvent *p) {
 
             Vector2f controlDiff = controlDir * controlLength;
 
+            vector<Vector2f> tempforbezier;
+
+            //To add the start point and two control point and the aim point
+            tempforbezier.push_back(beziercurve.back ());
+            tempforbezier.push_back(prevWaypoint - prevControlDiff);
+            tempforbezier.push_back(waypoint + controlDiff);
+            tempforbezier.push_back(waypoint);
+            ComputeBezier3(tempforbezier, 10, beziercurve);
+
+            /*
+            int errorpoints = _stateSpace->transitionValid(beziercurve);
+            if(errorpoints > -1)
+            {
+                int pointer = errorpoints / 10 + 1;
+                Vector2f addedpoint((_previousSolution[pointer-1].x()+_previousSolution[pointer].x())/2,
+                        (_previousSolution[pointer-1].y()+_previousSolution[pointer].y())/2);
+                _previousSolution.insert(_previousSolution.begin() + pointer, addedpoint);
+                beziercurve.clear();
+            }
+            */
+
+            /*
             path.cubicTo(
                 vecToPoint(prevWaypoint - prevControlDiff),
                 vecToPoint(waypoint + controlDiff),
                 vecToPoint(waypoint)
             );
+            */
 
             prevControlDiff = controlDiff;
         }
 
-        painter.drawPath(path);
+        //Draw the bezier curve
+        if (beziercurve.size() > 0) {
+            Vector2f prev;
+            bool first = true;
+            for (const Vector2f &curr : beziercurve) {
+                if (first) {
+                    first = false;
+                } else {
+                    painter.drawLine(QPointF(prev.x(), prev.y()), QPointF(curr.x(), curr.y()));
+                }
+                prev = curr;
+            }
+        }
+
+  //      painter.drawPath(path);
     }
 
 
@@ -300,13 +350,13 @@ void RRTWidget::paintEvent(QPaintEvent *p) {
     drawTree(painter, _biRRTStar->startTree(), _biRRTStar->startSolutionNode());
     drawTree(painter, _biRRTStar->goalTree(), _biRRTStar->goalSolutionNode(), Qt::darkGreen);
 
-    //  draw start and goal states
-    drawTerminalState(painter, _biRRTStar->startState(), _startVel, Qt::red);
-    drawTerminalState(painter, _biRRTStar->goalState(), _goalVel, Qt::darkGreen);
+    //  draw start and goal points
+    drawTerminalState(painter, _biRRTStar->startState(), _startVel, Qt::darkBlue);
+    drawTerminalState(painter, _biRRTStar->goalState(), _goalVel, Qt::darkGreen);    
 }
 
 /*
- * draw the start and goal symbol
+ * Draw the start and goal point miss the arrow shaft
  */
 void RRTWidget::drawTerminalState(QPainter &painter, const Vector2f &pos, const Vector2f &vel, const QColor &color) {
     //  draw point
@@ -321,7 +371,7 @@ void RRTWidget::drawTerminalState(QPainter &painter, const Vector2f &pos, const 
 
     //  draw arrow shaft
     painter.setPen(QPen(color, 3));
-    painter.drawLine(rootLoc, tipLoc);
+//    painter.drawLine(rootLoc, tipLoc);
 
     //  draw arrow head
     Vector2f headBase = tipLocVec - tipOffset.normalized()*4;
@@ -333,7 +383,7 @@ void RRTWidget::drawTerminalState(QPainter &painter, const Vector2f &pos, const 
         QPointF(tipLeftVec.x(), tipLeftVec.y()),
         QPointF(tipRightVec.x(), tipRightVec.y())
     };
-    painter.drawPolygon(trianglePts, 3);
+//    painter.drawPolygon(trianglePts, 3);
 }
 
 void RRTWidget::drawTree(QPainter &painter,
@@ -361,7 +411,7 @@ void RRTWidget::drawTree(QPainter &painter,
 
     //  draw solution
     if (solutionNode) {
-        painter.setPen(QPen(solutionColor, 2));
+        painter.setPen(QPen(solutionColor, 4));
 
         const Node<Vector2f> *node = solutionNode, *parent = solutionNode->parent();
         while (parent) {
@@ -370,7 +420,6 @@ void RRTWidget::drawTree(QPainter &painter,
             QPointF to = pointFromNode(parent);
             painter.drawLine(from, to);
 
-            //  scooch
             node = parent;
             parent = parent->parent();
         }
@@ -378,14 +427,13 @@ void RRTWidget::drawTree(QPainter &painter,
 }
 
 
-#pragma mark Mouse Events
-
 bool RRTWidget::mouseInGrabbingRange(QMouseEvent *event, const Vector2f &pt) {
     float dx = event->pos().x() - pt.x();
     float dy = event->pos().y() - pt.y();
     return sqrtf( dx*dx + dy*dy ) < 15;
 }
 
+//React to the mouse press event ,1.drag the start and goal 2.add and remove the obstacle
 void RRTWidget::mousePressEvent(QMouseEvent *event) {
     if (mouseInGrabbingRange(event, _biRRTStar->startState())) {
         _draggingItem = DraggingStart;

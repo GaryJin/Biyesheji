@@ -48,7 +48,8 @@ HEADERS  += \
     3dplane/GridStateSpace3d.h \
     3dplane/ObstacleGrid3d.h \
     3dplane/PlaneStateSpace3d.h \
-    3dplane/3dplane.h
+    3dplane/3dplane.h \
+    bezier2d.h
 
 FORMS    += mainwindow.ui
 

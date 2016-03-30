@@ -2,10 +2,15 @@
 #include "MainWindow.hpp"
 #include <QDebug>
 
-MainWindow::MainWindow() {
+
+MainWindow::MainWindow() {    
+
+
     _rrtWidget = new RRTWidget();
 
-    setWindowTitle("Interactive MyBRRT*");
+    setWindowTitle("MyBRRT* 2D Display");
+
+//    this->setStyleSheet("background-color:rgb(52,244,254)");
 
     _iterationCountLabel = new QLabel(this);
     _iterationCountLabel->setText("Iterations: 0");
@@ -17,7 +22,7 @@ MainWindow::MainWindow() {
 
     QPushButton *run = new QPushButton(this);
     run->setText("Run");
-    run->setStyleSheet("background-color: green;");
+
 
     QPushButton *stop = new QPushButton(this);
     stop->setText("Stop");
@@ -39,7 +44,7 @@ MainWindow::MainWindow() {
 
     QPushButton *clearObstacles = new QPushButton(this);
     clearObstacles->setText("Clear Obstacles");
-    clearObstacles->setStyleSheet("background-color: red;");
+//    clearObstacles->setStyleSheet("background-color: red;");
 
     QSlider *goalBias = new QSlider(Qt::Horizontal, this);
     goalBias->setTickPosition(QSlider::TicksBelow);
@@ -126,6 +131,7 @@ void MainWindow::slot_updateWaypointBiasLabel(int value) {
 void MainWindow::slot_updateIterationCount(int iterationCount) {
     _iterationCountLabel->setText(QString("Iterations: %1").arg(iterationCount));
 }
+
 void MainWindow::slot_updateSolutionLength(int solutionLength)
 {
     if(solutionLength<0)

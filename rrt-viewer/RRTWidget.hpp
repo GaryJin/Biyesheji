@@ -4,7 +4,7 @@
 #include <birrtstar.h>
 #include <2dplane/GridStateSpace.hpp>
 #include <Eigen/Dense>
-
+#include <birrt.h>
 
 /**
  * This widget creates an RRT tree for searching a 2d space and draws it.
@@ -59,13 +59,13 @@ protected:
 
 private:
     std::shared_ptr<GridStateSpace> _stateSpace;
-//    RRT::BiRRT<Eigen::Vector2f> *_biRRTStar;
     RRTStar::BiRRTStar<Eigen::Vector2f> *_biRRTStar;
+
     Eigen::Vector2f _startVel, _goalVel;
 
     //  if you click down on an obstacle, you enter erase mode
     //  if you click down where there's no obstacle, you enter draw mode
-    bool _editingObstacles, _erasingObstacles;
+    bool _editingObstacles, _erasingObstacles, treeflags;
 
     enum {
         DraggingNone = 0,
@@ -78,6 +78,7 @@ private:
     int _waypointCacheMaxSize;
 
     std::vector<Eigen::Vector2f> _previousSolution;
+
 
     QTimer *_runTimer;
 };
