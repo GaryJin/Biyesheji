@@ -133,17 +133,18 @@ namespace RRT
             Node<T> *newStartNode = _startTree.grow();
             if (newStartNode) {
                 otherNode = _findBestPath(newStartNode->state(), _goalTree, &depth);
-                if (otherNode && depth + newStartNode->getDistance() < _solutionLength) {
+                if (otherNode &&( (depth + newStartNode->getDistance()) < _solutionLength) ) {
                     _startSolutionNode = newStartNode;
                     _goalSolutionNode = otherNode;
                     _solutionLength = newStartNode->getDistance() + depth;
                 }
             }
 
+
             Node<T> *newGoalNode = _goalTree.grow();
             if (newGoalNode) {
                 otherNode = _findBestPath(newGoalNode->state(), _startTree, &depth);
-                if (otherNode && depth + newGoalNode->getDistance() < _solutionLength) {
+                if (otherNode && ((depth + newGoalNode->getDistance()) < _solutionLength)) {
                     _startSolutionNode = otherNode;
                     _goalSolutionNode = newGoalNode;
                     _solutionLength = newGoalNode->getDistance() + depth;
@@ -205,10 +206,12 @@ namespace RRT
             for (Node<T> *other : treeToSearch.allNodes()) {
                 float dist = _startTree.stateSpace().distance(other->state(), targetState);
                 if (dist < goalMaxDist() && other->getDistance() < depth) {
-                    if (dist < goalMaxDist() && other->getDistance() < depth ) {
-                        bestNode = other;
-                        depth = other->getDistance() + dist;
-                    }
+                    if(_startTree.stateSpace ().transitionValid (other->state (), targetState))
+                        if (dist < goalMaxDist() && other->getDistance() < depth )
+                        {
+                            bestNode = other;
+                            depth = other->getDistance() + dist;
+                        }
                 }
             }
 

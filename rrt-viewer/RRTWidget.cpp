@@ -135,7 +135,7 @@ void RRTWidget::step(int numTimes) {
 
     //  store solution
     _previousSolution.clear();
-    if (_biRRTStar->startSolutionNode() != nullptr) {
+    if (_biRRTStar->startSolutionNode() != nullptr || _biRRTStar->goalSolutionNode() != nullptr) {
         _biRRTStar->getPath(_previousSolution);
         Planning::SmoothPath<Vector2f>(_previousSolution, *_stateSpace);
         emit signal_solution(_biRRTStar->getsolutionLength());

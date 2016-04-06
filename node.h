@@ -39,8 +39,7 @@ public:
     void changeparent(Node<T> *newparent)
     {
         _parent->removechildren(this);
-        _parent=newparent;
-
+        _parent = newparent;
     }
 
     /**
@@ -59,11 +58,19 @@ public:
     /**
      * set the distance of the Node to the root
      */
-    void setDistance(double i)
+    void setDistance(double dist)
     {
-        distance=i;
+        distance = dist;
     }
 
+    void resetDistance(double dist)
+    {
+        if(!_children.empty ())
+            for( Node<T>* iter : _children)
+                iter->resetDistance (dist);
+        distance -= dist;
+
+    }
 
     double getDistance()
     {

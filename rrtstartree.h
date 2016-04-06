@@ -16,7 +16,7 @@
 #include <float.h>
 
 //the Coefficient of the rande
-const double CoefficientATrange=1.4;
+const double CoefficientATrange=5.4;
 
 namespace RRTStar
 {
@@ -200,11 +200,7 @@ namespace RRTStar
             for (int i = 0; i < this->_maxIterations; i++) {
                 Node<T> *newNode = grow(DBL_MAX);
                 if (newNode && this->_stateSpace->distance(newNode->state(), this->_goalState) < this->_goalMaxDist) return true;
-                if (newNode)
-                {
-                    nearnodes(newNode);
-                    OptimizeNearNodes(newNode);
-                }
+
             }
 
             //  we hit our iteration limit and didn't reach the goal :(
@@ -234,20 +230,21 @@ namespace RRTStar
          * node.
          * @param aim node
          */
-        void nearnodes(Node<T> *newnode)
+        void nearnodes(const T &newnode)
         {
             //claer the old _nearnodes
             if(!_nearnodes.empty())
                 _nearnodes.clear();
             //count the range
             double range=stepSize()*CoefficientATrange*pow(log(_nodes.size())/_nodes.size(),1/3.0);
-            //qDebug()<<"range="<<range;
+ //           qDebug()<<"range="<<range;
             //find out the near nodes
             for(Node<T> *other : _nodes)
             {
-                if((_stateSpace->distance(other->state(),newnode->state()))<range)
+                if((_stateSpace->distance(other->state(),newnode))<range)
                 {
-                    _nearnodes.push_back(other);
+                    if(_stateSpace->transitionValid (other->state (),newnode))
+                        _nearnodes.push_back(other);
                 }
             }
         }
@@ -257,20 +254,23 @@ namespace RRTStar
          * if the distance will be less through the aim node
          * @param aim node
          */
-        void OptimizeNearNodes(Node<T> *newnode)
+        void OptimizeNearNodes(Node<T> *newnode , Node<T> *parent)
         {
             for(Node<T> *nearnode : _nearnodes)
             {
-                double newdistance=newnode->getDistance()+_stateSpace->distance(newnode->state(),nearnode->state());
-                //find a way that have less distance to nearnode through newnode
-                if(nearnode->getDistance()>newdistance)
+                if(nearnode!=parent)
                 {
-                    nearnode->changeparent(newnode);
-                    nearnode->setDistance(newdistance);
-                    newnode->addchildren(nearnode);
-               //     qDebug()<<"Op once!";
+                    double newdistance=newnode->getDistance()+_stateSpace->distance(newnode->state(),nearnode->state());
+                    //find a way that have less distance to nearnode through newnode
+                    if(nearnode->getDistance()>newdistance)
+                    {
+                        double dist = nearnode->getDistance() - newdistance;
+                        nearnode->resetDistance(dist);
+                        nearnode->changeparent(newnode);
+                        newnode->addchildren(nearnode);
+                   //     qDebug()<<"Op once!";
+                    }
                 }
-
             }
         }
 
@@ -313,14 +313,28 @@ namespace RRTStar
             }
 
             // Add a node to the tree for this state
-            Node<T> *n = new Node<T>(intermediateState, source);
-            n->setDistance(_stateSpace->distance(source->state(),intermediateState)+source->getDistance());
-            if(n->getDistance()>limitdistance)
-            {
-                delete n;
+            double n_distance = _stateSpace->distance (source->state (),intermediateState) + source->getDistance ();
+            if( n_distance > limitdistance)
                 return nullptr;
+
+            //get nearnodes
+            nearnodes(intermediateState);
+   //         qDebug()<<"nearnodes:"<<_nearnodes.size ();
+            //search for best parent
+            for(Node<T> *nearnode : _nearnodes)
+            {
+                double nn_distance = nearnode->getDistance ()+_stateSpace->distance (nearnode->state (),intermediateState);
+                if(nn_distance<n_distance)
+                {
+                    n_distance=nn_distance;
+                    source=nearnode;
+                }
             }
+
+            Node<T> *n = new Node<T>(intermediateState, source);
+            n->setDistance (n_distance);
             _nodes.push_back(n);
+            OptimizeNearNodes(n,source);
             return n;
         }
 

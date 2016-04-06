@@ -1,5 +1,6 @@
 #include <2dplane/planestatespace.h>
 
+
 using namespace Eigen;
 
 
@@ -13,12 +14,21 @@ Vector2f PlaneStateSpace::randomState() const {
 }
 
 Vector2f PlaneStateSpace::intermediateState(const Vector2f &source, const Vector2f &target, float stepSize) const {
+
+
+    //if(this->distance (source,target) < stepSize / 1.5)
+    //{
+    //    return target;
+   // }
+
+
     Vector2f delta = target - source;
     delta = delta / delta.norm();   //  unit vector
 
     Vector2f val = source + delta * stepSize;
     return val;
 }
+
 
 double PlaneStateSpace::distance(const Eigen::Vector2f &from, const Eigen::Vector2f &to) const {
     Vector2f delta = from - to;

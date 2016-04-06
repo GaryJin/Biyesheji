@@ -2,6 +2,7 @@
 #include <util.h>
 #include <stdexcept>
 #include <math.h>
+#include <qdebug.h>
 
 using namespace Eigen;
 using namespace std;
@@ -21,7 +22,13 @@ bool GridStateSpace::stateValid(const Vector2f &pt) const {
 Vector2f GridStateSpace::intermediateState(const Vector2f &source, const Vector2f &target, float minStepSize, float maxStepSize) const {
     bool debug;
 
+    //if(this->distance (source,target) < minStepSize)
+    //{
+    //    return target;
+    //}
+
     Vector2f delta = target - source;
+
     delta = delta / delta.norm();   //  unit vector
     float dist = _obstacleGrid.nearestObstacleDist(source, maxStepSize * 2);
 

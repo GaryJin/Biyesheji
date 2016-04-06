@@ -131,10 +131,8 @@ namespace RRTStar
 
             Node<T> *newStartNode = _startTree.grow(_solutionLength);
             if (newStartNode) {
-                _startTree.nearnodes(newStartNode);
-                _startTree.OptimizeNearNodes(newStartNode);
                 otherNode = _findBestPath(newStartNode->state(), _goalTree, &depth);
-                if (otherNode && depth + newStartNode->getDistance() < _solutionLength) {
+                if (otherNode && ((depth + newStartNode->getDistance()) < _solutionLength)) {
                     _startSolutionNode = newStartNode;
                     _goalSolutionNode = otherNode;
                     _solutionLength = newStartNode->getDistance() + depth;
@@ -144,20 +142,15 @@ namespace RRTStar
 
             Node<T> *newGoalNode = _goalTree.grow(_solutionLength);
             if (newGoalNode) {
-                _goalTree.nearnodes(newGoalNode);
-                _goalTree.OptimizeNearNodes(newGoalNode);
                 otherNode = _findBestPath(newGoalNode->state(), _startTree, &depth);
-                if (otherNode && depth + newGoalNode->getDistance() < _solutionLength) {
+                if (otherNode && ((depth + newGoalNode->getDistance()) < _solutionLength)) {
                     _startSolutionNode = otherNode;
                     _goalSolutionNode = newGoalNode;
                     _solutionLength = newGoalNode->getDistance() + depth;
                 }
             }
-
             ++_iterationCount;
-//            qDebug()<<"iteration:"<<_iterationCount;
- //           qDebug()<<"_start tree:"<<_startTree.allNodes().size();
-  //          qDebug()<<"_goal tree:"<<_goalTree.allNodes().size();
+
         }
 
 
@@ -170,6 +163,18 @@ namespace RRTStar
                 if (_startSolutionNode != nullptr) return true;
             }
             return false;
+        }
+
+
+        bool RunToAimLength(double length ,int Exiteration)
+        {
+            while( this->getsolutionLength () > length)
+            {
+                this->grow ();
+                if(iterationCount () > Exiteration)
+                    return false;
+            }
+            return true;
         }
 
 
@@ -213,10 +218,11 @@ namespace RRTStar
                 float dist = _startTree.stateSpace().distance(other->state(), targetState);
                 if (dist < goalMaxDist() && other->getDistance() < depth ) {
                     if(_startTree.stateSpace ().transitionValid (other->state (), targetState))
-                    {
-                        bestNode = other;
-                        depth = other->getDistance() + dist;
-                    }
+                        if (dist < goalMaxDist() && other->getDistance() < depth )
+                        {
+                            bestNode = other;
+                            depth = other->getDistance() + dist;
+                        }
                 }
             }
 
